@@ -420,7 +420,6 @@ void save_bmpv3image(char* name, BMPV3IMAGE* bmpv3image) {
     //Запись пиксельного массива
     int width = bmpv3_header_meta->width;
     int height = bmpv3_header_meta->height;
-    int pixels_count = width * height;
     int bytes_per_pxl = (int)bmpv3_header_meta->bits_per_pxl / 8;
     int aligning = (4 - (bytes_per_pxl * width) % 4) % 4;
     int aligning_zero = 0;
