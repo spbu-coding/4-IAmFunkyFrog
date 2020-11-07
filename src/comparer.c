@@ -89,7 +89,7 @@ int main(int argc, char* argv[]) {
         return -1;
     }
     else if(size > 0) {
-        for(unsigned int i = 0; i < (int)size; i++) {
+        for(int i = 0; i < size; i++) {
             int x = mismatch_array[i] % bmpv3image1->header_meta->width;
             int y = mismatch_array[i] / bmpv3image1->header_meta->width;
             error("%d %d\n", x + 1, y + 1);
