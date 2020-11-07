@@ -425,7 +425,7 @@ void save_bmpv3image(char* name, BMPV3IMAGE* bmpv3image) {
     int aligning_zero = 0;
     if(bmpv3_header_meta->signed_height == -1)
         reverse_pixel_array(bmpv3image->pixel_array, bmpv3_header_meta->bits_per_pxl, width, height);
-    for(unsigned int i = 0; i < height * width; i++) {
+    for(int i = 0; i < height * width; i++) {
         if(fwrite(&bmpv3image->pixel_array[i], bytes_per_pxl, 1, new_file) != 1) {
             fclose(new_file);
             BMPV3FILEDECODEERROR = WRITEERROR;
