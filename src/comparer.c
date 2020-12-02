@@ -6,10 +6,8 @@
 
 int validate_filename(char* filename) {
     char* p = strstr(filename, ".bmp");
-    if(p == NULL || *(p + 4) != '\0')
-        return 0;
-    else
-        return 1;
+    if(p == NULL || *(p + 4) != '\0') return 0;
+    else return 1;
 }
 
 int check_decode_error() {
@@ -67,8 +65,10 @@ int main(int argc, char* argv[]) {
     if(check_decode_error() != 0)
         return -1;
     BMPV3IMAGE* bmpv3image2 = decode_bmpv3file(argv[2]);
-    if(check_decode_error() != 0)
+    if(check_decode_error() != 0) {
+        free_bmpv3image(bmpv3image1);
         return -1;
+    }
     int mismatch_array[MISMATCH_ARRAY_MAX_SIZE], size;
     size = compare_bmpv3image(*bmpv3image1, *bmpv3image2, mismatch_array, MISMATCH_ARRAY_MAX_SIZE);
     if(size < 0) {
@@ -86,6 +86,8 @@ int main(int argc, char* argv[]) {
                 error("Unknown error");
                 break;
         }
+        free_bmpv3image(bmpv3image1);
+        free_bmpv3image(bmpv3image2);
         return -1;
     }
     else if(size > 0) {
@@ -94,8 +96,13 @@ int main(int argc, char* argv[]) {
             int y = mismatch_array[i] / bmpv3image1->header_meta->width;
             error("%d %d\n", x + 1, y + 1);
         }
+        free_bmpv3image(bmpv3image1);
+        free_bmpv3image(bmpv3image2);
         return size;
     }
+
+    free_bmpv3image(bmpv3image1);
+    free_bmpv3image(bmpv3image2);
 
     return 0;
 }

@@ -6,24 +6,29 @@
 enum BmpV3DecodeError BMPV3FILEDECODEERROR = NOERROR;
 
 //Приватная функция
-void reverse_pixel_array(int* array, int bits_per_pxl, int width, int height) {
+static void malloc_error() {
+    fprintf(stderr, "Malloc allocation error\n");
+    exit(EXIT_FAILURE);
+}
+//Приватная функция
+static void reverse_pixel_array(int* array, int bits_per_pxl, int width, int height) {
     int bytes_per_pxl = bits_per_pxl / 8;
     int aligning = (4 - (bytes_per_pxl * width) % 4) % 4;
     int byte_length_to_swap = (int)sizeof(int) * width + aligning;
     int* tmp = (int*)malloc(byte_length_to_swap);
+    if(tmp == NULL) {
+        malloc_error();
+        return;
+    }
     for(int i = 0; i < height / 2; i++) {
         memcpy(tmp, &array[width * i], byte_length_to_swap);
         memcpy(&array[width * i], &array[width * (height - i - 1)], byte_length_to_swap);
         memcpy(&array[width * (height - i - 1)], tmp, byte_length_to_swap);
     }
+    free(tmp);
 }
 //Приватная функция
-void malloc_error() {
-    fprintf(stderr, "Malloc allocation error\n");
-    exit(EXIT_FAILURE);
-}
-//Приватная функция
-int validate_bmpv3_header_meta_type(BMPV3HEADERMETA bmpv3_header_meta) {
+static int validate_bmpv3_header_meta_type(BMPV3HEADERMETA bmpv3_header_meta) {
     char possible_values[6][2] = {
             "BM", "BA", "CI", "CP", "IC", "PT"
     };
@@ -208,7 +213,7 @@ BMPV3HEADERMETA* decode_bmpv3_meta(FILE* bmpv3file) {
     return bmpv3_header_meta;
 }
 //Подразумевается, что bmpv3file уже указывает на 1ый байт таблицы цветов, приватная функция
-int* decode_bmpv3_color_table(unsigned int number_of_colors, FILE* bmpv3file) {
+static int* decode_bmpv3_color_table(unsigned int number_of_colors, FILE* bmpv3file) {
     if(number_of_colors == 0)
         return NULL;
     int* color_table = (int*)malloc(sizeof(int) * number_of_colors);
@@ -224,7 +229,7 @@ int* decode_bmpv3_color_table(unsigned int number_of_colors, FILE* bmpv3file) {
     return color_table;
 }
 //Подразумевается, что bmpv3file уже указывает на 1 байт пиксельной матрицы в bmp файлеm, приватная функция
-int* decode_bmpv3_pixel_array(BMPV3HEADERMETA* header_meta, FILE* bmpv3file) {
+static int* decode_bmpv3_pixel_array(BMPV3HEADERMETA* header_meta, FILE* bmpv3file) {
     int width = header_meta->width;
     int height = header_meta->height;
     int bits_per_pxl = (int)header_meta->bits_per_pxl;
@@ -256,11 +261,11 @@ int* decode_bmpv3_pixel_array(BMPV3HEADERMETA* header_meta, FILE* bmpv3file) {
     return pixel_array;
 }
 //Приватная функция, возвращает 4 байта, содержащие информацию о пикселе (могут использоваться не все байты)
-int get_pixel(int x, int y, BMPV3IMAGE* bmpv3image) {
+static int get_pixel(int x, int y, BMPV3IMAGE* bmpv3image) {
     return bmpv3image->pixel_array[y * bmpv3image->header_meta->width + x];
 }
 //Приватная функция, устанавливает первые bmpv3image->header_meta->bits_per_pixel из value как новое значение пикселся
-void set_pixel(int x, int y, int value, BMPV3IMAGE* bmpv3image) {
+static void set_pixel(int x, int y, int value, BMPV3IMAGE* bmpv3image) {
     bmpv3image->pixel_array[y * bmpv3image->header_meta->width + x] = value;
 }
 //Публичная функция
