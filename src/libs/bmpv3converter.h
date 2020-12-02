@@ -10,6 +10,7 @@
 
 enum BmpV3DecodeError {
     NOERROR,
+    MALLOCERROR,
     NULLFILEPTR,
     TYPEERROR,
     BROKENFILEERROR,
